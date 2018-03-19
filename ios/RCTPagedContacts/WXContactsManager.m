@@ -18,12 +18,12 @@
 - (instancetype)init
 {
 	self = [super init];
-	
+
 	if(self)
 	{
 		_store = [CNContactStore new];
 	}
-	
+
 	return self;
 }
 
@@ -38,15 +38,15 @@
 	if(_chachedIdentifiers == nil)
 	{
 		NSMutableArray* identifiers = [NSMutableArray new];
-		
+
 		CNContactFetchRequest *request = [[CNContactFetchRequest alloc] initWithKeysToFetch:@[CNContactIdentifierKey]];
 		request.unifyResults = YES;
-		request.sortOrder = CNContactSortOrderGivenName;
+		request.sortOrder = CNContactSortOrderUserDefault;
 		if(_nameMatch != nil)
 		{
 			request.predicate = [CNContact predicateForContactsMatchingName:_nameMatch];
 		}
-		
+
 		NSError* error = nil;
 		if([_store enumerateContactsWithFetchRequest:request error:&error usingBlock:^(CNContact * _Nonnull contact, BOOL * _Nonnull stop) {
 			[identifiers addObject:contact.identifier];
@@ -54,10 +54,10 @@
 		{
 			NSLog(@"Contact manager failed to obtain contact identifiers with error: %@", error);
 		}
-		
+
 		_chachedIdentifiers = identifiers;
 	}
-	
+
 	return _chachedIdentifiers;
 }
 
@@ -79,7 +79,7 @@
 			{
 				NSLog(@"Contact manager got error when attempting to request access: %@", error);
 			}
-			
+
 			completionHandler(granted, error);
 		}];
 	}
@@ -88,17 +88,17 @@
 - (NSArray<CNContact*>*)contactsWithRange:(NSRange)range keysToFetch:(NSArray<NSString*>*)keysToFetch
 {
 	NSMutableArray* contacts = [NSMutableArray new];
-    
+
     range.length = MIN(range.length, self._chachedIdentifiers.count);
-	
+
 	NSArray* identifiers = [self._chachedIdentifiers subarrayWithRange:range];
-	
+
 	CNContactFetchRequest *request = [[CNContactFetchRequest alloc] initWithKeysToFetch:@[CNContactIdentifierKey]];
 	request.unifyResults = YES;
 	request.sortOrder = CNContactSortOrderUserDefault;
 	request.predicate = [CNContact predicateForContactsWithIdentifiers:identifiers];
 	request.keysToFetch = keysToFetch;
-	
+
 	NSError* error = nil;
 	if([_store enumerateContactsWithFetchRequest:request error:&error usingBlock:^(CNContact * _Nonnull contact, BOOL * _Nonnull stop) {
 		[contacts addObject:contact];
@@ -106,20 +106,20 @@
 	{
 		NSLog(@"Contact manager failed to obtain contact from range with error: %@", error);
 	}
-	
+
 	return contacts;
 }
 
 - (NSArray<CNContact*>*)contactsWithIdentifiers:(NSArray<NSString*>*)identifiers keysToFetch:(NSArray<NSString*>*)keysToFetch
 {
 	NSMutableArray* contacts = [NSMutableArray new];
-	
+
 	CNContactFetchRequest *request = [[CNContactFetchRequest alloc] initWithKeysToFetch:@[CNContactIdentifierKey]];
 	request.unifyResults = YES;
 	request.sortOrder = CNContactSortOrderUserDefault;
 	request.predicate = [CNContact predicateForContactsWithIdentifiers:identifiers];
 	request.keysToFetch = keysToFetch;
-	
+
 	NSError* error = nil;
 	if([_store enumerateContactsWithFetchRequest:request error:&error usingBlock:^(CNContact * _Nonnull contact, BOOL * _Nonnull stop) {
 		[contacts addObject:contact];
@@ -127,7 +127,7 @@
 	{
 		NSLog(@"Contact manager failed to obtain contact from identifiers with error: %@", error);
 	}
-	
+
 	return contacts;
 }
 
